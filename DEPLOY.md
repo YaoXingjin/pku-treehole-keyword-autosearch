@@ -30,7 +30,7 @@ mkdir -p /home/<remote_user>
 
 ```bash
 cd /home/<remote_user>
-git clone <your_repo_url> pku-treehole-keyword-autosearch
+git clone https://github.com/YaoXingjin/pku-treehole-keyword-autosearch.git pku-treehole-keyword-autosearch
 ```
 
 如果云主机暂时不能访问 GitHub，也可以从本地打包上传，但不要把 `config_private.py`、状态文件、日志、cookie 一起打包。
