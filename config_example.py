@@ -1,0 +1,27 @@
+"""示例配置：复制为 config_private.py 后填写真实信息。
+
+安全建议：账号密码可优先放环境变量。
+- TREEHOLE_USERNAME
+- TREEHOLE_PASSWORD
+- TREEHOLE_KEYWORD（可选，覆盖 KEYWORD）
+- TREEHOLE_COMMENT_LIMIT（可选，覆盖 COMMENT_LIMIT）
+- MEOW_NICKNAME
+"""
+
+# PKU IAAA 账号密码
+USERNAME = "<YOUR_STUDENT_ID>"
+PASSWORD = "<YOUR_PASSWORD>"
+
+# 搜索关键词
+KEYWORD = "<YOUR_KEYWORD>"
+
+# 搜索参数
+SEARCH_PAGE = 1
+SEARCH_LIMIT = 30
+COMMENT_LIMIT = 10
+
+# Cookies 持久化路径（默认写到用户主目录）
+COOKIES_FILE = None
+
+# MeoW 手机推送昵称（也可用环境变量 MEOW_NICKNAME 覆盖）
+MEOW_NICKNAME = "<YOUR_MEOW_NICKNAME>"

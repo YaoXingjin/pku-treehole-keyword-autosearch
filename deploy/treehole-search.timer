@@ -1,0 +1,10 @@
+[Unit]
+Description=Run PKU Treehole keyword search daily
+
+[Timer]
+OnCalendar=*-*-* 02:00:00
+Persistent=true
+Unit=treehole-search.service
+
+[Install]
+WantedBy=timers.target

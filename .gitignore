@@ -1,0 +1,48 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+.doc_cache/
+
+# Private configuration
+config_private.py
+email_config.py
+email_bot/email_config.py
+
+# Cookies and session files
+cookies.json
+*.cookies.json
+.treehole_cookies.json
+user_cookies/
+seen_posts_state*.json
+
+# Cache and data
+data/
+state/
+!requirements.txt
+deploy-package.*
+
+# Logs
+logs/
+
+
+# Virtual environment
+.venv/
+venv/
+env/
+ENV/
+.env
+.env.*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

@@ -1,0 +1,10 @@
+[Unit]
+Description=PKU Treehole keyword search and MeoW push
+
+[Service]
+Type=oneshot
+EnvironmentFile=%h/.config/pku-treehole-keyword-autosearch/env
+Environment=NO_PROXY=localhost,127.0.0.1,::1,treehole.pku.edu.cn,iaaa.pku.edu.cn
+Environment=no_proxy=localhost,127.0.0.1,::1,treehole.pku.edu.cn,iaaa.pku.edu.cn
+Environment=MEOW_DIRECT_FALLBACK=1
+ExecStart=/bin/bash -lc 'exec "$PROJECT_DIR/scripts/run_treehole_search.sh"'
