@@ -17,7 +17,7 @@
 - 支持本地运行，也支持部署到 PKU CLab 云主机并用 systemd timer 每天定时执行。
 - 在 CLab 上可先登录北大网关，再执行树洞搜索和 MeoW 推送。
 
-## 安装（以 Windows 为例）
+## 安装
 
 ```bash
 python -m venv .venv
@@ -31,7 +31,7 @@ python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
 ```
 
-## 配置（以 Windows 为例）
+## 配置
 
 复制示例配置：
 
@@ -72,9 +72,9 @@ export MEOW_NICKNAME="<your_meow_nickname>"
 
 `config_private.py`、cookie、日志和状态文件都已在 `.gitignore` 中排除，请不要提交。
 
-## 本地使用
+## 本地手动测试
 
-在项目目录下执行，验证 MeoW 推送：
+在项目目录下执行，验证 MeoW 推送链路：
 
 ```bash
 python search_keyword.py --test-push
@@ -96,7 +96,7 @@ python search_keyword.py
 
 首次登录可能需要按提示输入短信验证码或手机令牌。
 
-## 推送格式
+### 推送格式
 
 标题：
 

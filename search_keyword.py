@@ -228,7 +228,7 @@ def send_test_push():
     base_url = os.getenv("MEOW_BASE_URL") or "https://api.chuckfang.com"
     title = "树洞推送测试"
     message = (
-        "这是一条本地 MeoW 推送验证消息。\n"
+        "这是一条 MeoW 推送验证消息。\n"
         "如果你在手机上看到它，说明 MeoW 推送通道可以正常使用。"
     )
     result = send_meow_push(
