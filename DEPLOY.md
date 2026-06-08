@@ -113,8 +113,11 @@ PROJECT_DIR=<project_dir> scripts/check_deploy_ready.sh
 mkdir -p ~/.config/pku-treehole-keyword-autosearch
 cat > ~/.config/pku-treehole-keyword-autosearch/env <<'EOF'
 PROJECT_DIR=/home/<remote_user>/pku-treehole-keyword-autosearch
+MEOW_NICKNAME=<your_meow_nickname>
 EOF
 ```
+
+`MEOW_NICKNAME` 也可以只写在 `config_private.py` 中；但更建议同时写入这个 systemd 环境文件。这样定时任务启动时可以发送 MeoW 提醒；当 `config_private.py` 缺失、路径写错或 Python 环境尚未安装完整时，失败提醒也更有机会发到手机。
 
 复制 service 和 timer：
 
@@ -151,19 +154,89 @@ systemctl --user start treehole-search.service
 tail -n 100 logs/treehole-search.log
 ```
 
-## 7. 运行逻辑
+手动触发后，脚本启动时会尽量发送标题为 `树洞定时任务启动` 的 MeoW 提醒。如果执行失败，脚本会尽量发送标题为 `树洞定时任务失败` 的 MeoW 提醒。失败提醒正文会包含失败原因、发生时间、主机名、项目目录和日志路径。
+
+## 7. 检查运行状态
+
+登录云主机后，先确认 systemd timer 是否启用、下一次什么时候运行：
+
+```bash
+systemctl --user status treehole-search.timer
+systemctl --user list-timers --all | grep treehole
+```
+
+再看 service 最近一次执行结果：
+
+```bash
+systemctl --user status treehole-search.service
+```
+
+读取项目目录环境文件，确认 `PROJECT_DIR` 指向哪里。不要在这里放账号密码；如果写了 `MEOW_NICKNAME`，它只用于失败提醒。
+
+```bash
+cat ~/.config/pku-treehole-keyword-autosearch/env
+```
+
+进入项目目录后看最近日志：
+
+```bash
+cd <project_dir>
+tail -n 100 logs/treehole-search.log
+```
+
+只检查私有配置是否存在和权限是否正确，不要打印 `config_private.py` 内容：
+
+```bash
+test -f config_private.py && echo "config_private.py exists"
+stat -c "%a %n" config_private.py
+```
+
+如果想立刻跑一次完整定时流程：
+
+```bash
+systemctl --user start treehole-search.service
+tail -n 100 logs/treehole-search.log
+```
+
+如果 timer 没有按预期出现，重新加载并启动：
+
+```bash
+systemctl --user daemon-reload
+systemctl --user enable --now treehole-search.timer
+systemctl --user list-timers --all | grep treehole
+```
+
+默认配置下，`treehole-search.timer` 每天 UTC 02:00 运行，也就是北京时间 10:00。可以用下面命令确认 timer 文件里的时间：
+
+```bash
+grep OnCalendar ~/.config/systemd/user/treehole-search.timer
+```
+
+## 8. 运行逻辑
 
 `scripts/run_treehole_search.sh` 会：
 
-1. 进入项目目录。
+1. 检查 `PROJECT_DIR` 指向的项目目录是否存在。
 2. 创建 `logs/` 和 `state/`。
-3. 检查 `config_private.py` 是否存在。
-4. 先登录北大网关。
-5. 再以非交互模式运行树洞搜索。
+3. 发送 `树洞定时任务启动` MeoW 提醒。
+4. 检查是否存在可运行且安装了 `requests` 的 Python。
+5. 检查 `config_private.py` 是否存在。
+6. 先登录北大网关。
+7. 再以非交互模式运行树洞搜索。
 
-如果树洞登录态失效并需要 PKU Helper 令牌，非交互模式会失败并通过 MeoW 推送提醒你手动登录。
+以下失败会尽量通过 MeoW 推送提醒：
 
-## 8. GitHub 更新
+- `PROJECT_DIR` 不存在。
+- 找不到可用 Python，或 Python 没有安装 `requests`。
+- 缺少 `config_private.py`。
+- 北大网关登录脚本异常退出。
+- `search_keyword.py --non-interactive` 异常退出，包括树洞登录态失效、令牌验证、搜索接口异常、配置错误或推送失败。
+
+如果树洞登录态失效并需要 PKU Helper 令牌，`search_keyword.py` 会发送专门的令牌验证提醒；外层定时入口检测到该提醒已经发送后，只记录日志，不再重复发送通用失败提醒。
+
+失败提醒依赖 MeoW 可达，且至少能从 `MEOW_NICKNAME` 环境变量或 `config_private.py` 中取得 MeoW 昵称。对于“找不到 Python”或“缺少 `config_private.py`”这类早期错误，最好在 systemd 环境文件里设置 `MEOW_NICKNAME`。
+
+## 9. GitHub 更新
 
 后续更新代码可以在云主机上执行：
 
