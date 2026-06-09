@@ -117,7 +117,13 @@ MEOW_NICKNAME=<your_meow_nickname>
 EOF
 ```
 
-`MEOW_NICKNAME` 也可以只写在 `config_private.py` 中；但更建议同时写入这个 systemd 环境文件。这样定时任务启动时可以发送 MeoW 提醒；当 `config_private.py` 缺失、路径写错或 Python 环境尚未安装完整时，失败提醒也更有机会发到手机。
+`MEOW_NICKNAME` 也可以只写在 `config_private.py` 中；但更建议同时写入这个 systemd 环境文件。当 `config_private.py` 缺失、路径写错或 Python 环境尚未安装完整时，失败提醒也更有机会发到手机。
+
+启动提醒默认关闭，避免每天定时运行都推送“任务启动”消息。部署调试时如需确认 timer 是否触发，可以临时加入：
+
+```bash
+MEOW_STARTUP_NOTIFY=1
+```
 
 复制 service 和 timer：
 
@@ -154,7 +160,7 @@ systemctl --user start treehole-search.service
 tail -n 100 logs/treehole-search.log
 ```
 
-手动触发后，脚本启动时会尽量发送标题为 `树洞定时任务启动` 的 MeoW 提醒。如果执行失败，脚本会尽量发送标题为 `树洞定时任务失败` 的 MeoW 提醒。失败提醒正文会包含失败原因、发生时间、主机名、项目目录和日志路径。
+如果设置了 `MEOW_STARTUP_NOTIFY=1`，手动触发后，脚本启动时会尽量发送标题为 `树洞定时任务启动` 的 MeoW 提醒。默认不发送启动提醒。若执行失败，脚本会尽量发送标题为 `树洞定时任务失败` 的 MeoW 提醒。失败提醒正文会包含失败原因、发生时间、主机名、项目目录和日志路径。
 
 ## 7. 检查运行状态
 
@@ -218,7 +224,7 @@ grep OnCalendar ~/.config/systemd/user/treehole-search.timer
 
 1. 检查 `PROJECT_DIR` 指向的项目目录是否存在。
 2. 创建 `logs/` 和 `state/`。
-3. 发送 `树洞定时任务启动` MeoW 提醒。
+3. 如果设置了 `MEOW_STARTUP_NOTIFY=1`，发送 `树洞定时任务启动` MeoW 提醒；默认跳过启动提醒。
 4. 检查是否存在可运行且安装了 `requests` 的 Python。
 5. 检查 `config_private.py` 是否存在。
 6. 先登录北大网关。

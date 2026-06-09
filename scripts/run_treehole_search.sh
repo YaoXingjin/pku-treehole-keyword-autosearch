@@ -180,7 +180,12 @@ cd "$PROJECT_DIR"
 mkdir -p "$LOG_DIR" "$STATE_DIR"
 LOG_FILE="$LOG_DIR/treehole-search.log"
 log "===== scheduled run started =====" >> "$LOG_FILE"
-notify_startup >> "$LOG_FILE" 2>&1
+
+if [[ "${MEOW_STARTUP_NOTIFY:-0}" =~ ^(1|true|True|TRUE|yes|Yes|YES|on|On|ON)$ ]]; then
+  notify_startup >> "$LOG_FILE" 2>&1
+else
+  log "Startup notification disabled. Set MEOW_STARTUP_NOTIFY=1 to enable it." >> "$LOG_FILE"
+fi
 
 if ! PYTHON_BIN="$(find_python_with_requests)"; then
   log "Python interpreter with requests not found." >> "$LOG_FILE"
