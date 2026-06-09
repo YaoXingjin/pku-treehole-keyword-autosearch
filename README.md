@@ -2,11 +2,11 @@
 
 在 PKU CLab 云主机部署脚本**定时检索含有特定关键词的[北大树洞](https://treehole.pku.edu.cn/ch/web/pc/index)**，并在发现新增帖子时**推送到移动设备**。默认每日北京时间 10:00 执行一次检索和推送尝试。
 
-本项目使用的推送服务基于 [MeoW](https://www.chuckfang.com/MeoW/api_doc.html) 软件，目前仅支持搭载 HarmonyOS 5.0 及以上版本的设备。如需要，可自行将推送服务更改为适配其他操作系统的软件（例如 [Bark](https://apps.apple.com/cn/app/bark-%E7%BB%99%E4%BD%A0%E7%9A%84%E6%89%8B%E6%9C%BA%E5%8F%91%E6%8E%A8%E9%80%81/id1403753865) for iOS）并提交 fork 。
+项目使用的推送服务基于 [MeoW](https://www.chuckfang.com/MeoW/api_doc.html) 软件，目前仅支持搭载 HarmonyOS 5.0 及以上版本的设备。如需要，可自行将推送服务更改为适配其他操作系统的软件（例如 [Bark](https://apps.apple.com/cn/app/bark-%E7%BB%99%E4%BD%A0%E7%9A%84%E6%89%8B%E6%9C%BA%E5%8F%91%E6%8E%A8%E9%80%81/id1403753865) for iOS）并提交 fork 。
 
-**本项目并非爬虫，使用时请遵循[北大树洞服务协议](https://treehole.pku.edu.cn/ch/web/pc/serviceAgreement)，请勿使用本项目高频大量爬取北大树洞，尤其请勿将树洞内容外传，相关风险及后果请自负。**  本项目推荐用途为低频监控与个人提醒，例如课程通知、失物招领、库存/预约信息等主题。
+项目推荐用途为低频监控与个人提醒，例如课程通知、失物招领、库存/预约信息等主题。需要注意，**本项目并非爬虫，使用时请遵循[北大树洞服务协议](https://treehole.pku.edu.cn/ch/web/pc/serviceAgreement)，请勿使用本项目高频大量爬取北大树洞，尤其请勿将树洞内容外传，相关风险及后果请自负。同时，不建议在北大树洞内发表含有本项目或类似项目的树洞，以免遭到禁言。** 
 
-本项目中北大树洞登录与搜索请求实现方式参考了 [SunVapor/pku-treehole-search-agent](https://github.com/SunVapor/pku-treehole-search-agent)。
+北大树洞登录与搜索请求实现方式参考了 [SunVapor/pku-treehole-search-agent](https://github.com/SunVapor/pku-treehole-search-agent)。
 
 ## 功能
 
@@ -19,9 +19,11 @@
 - 可选开启云端启动提醒，用于部署调试时确认 timer 确实触发。
 - 云端定时任务失败时会尽量发送 MeoW 提醒，覆盖网关登录失败、缺少 `config_private.py`、找不到可用 Python、树洞搜索脚本异常退出等情况。
 
-## 安装
+## 本地安装
 
 ```bash
+git clone https://github.com/YaoXingjin/pku-treehole-keyword-autosearch.git
+cd pku-treehole-keyword-autosearch
 python -m venv .venv
 .venv/bin/python -m pip install -r requirements.txt
 ```
@@ -29,6 +31,8 @@ python -m venv .venv
 Windows PowerShell 可直接使用：
 
 ```powershell
+git clone https://github.com/YaoXingjin/pku-treehole-keyword-autosearch.git
+cd pku-treehole-keyword-autosearch
 python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
 ```

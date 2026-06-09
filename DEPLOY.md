@@ -9,44 +9,73 @@
 - 本地可以通过 SSH 登录云主机。
 - 已经准备好 `config_private.py`，但不要把它提交到 Git。
 
-下面示例使用占位符，请按自己的环境替换：
+下面示例只在连接云主机和上传私有配置时使用占位符。进入项目目录后，后续命令都可以直接复制执行。
 
 ```text
 <remote_user>      云主机用户名，例如 rocky / ubuntu / debian
 <remote_host>      云主机 IP，例如 10.129.x.x
-<project_dir>      远程项目目录，例如 /home/<remote_user>/projects/pku-treehole-keyword-autosearch
 <identity_file>    SSH 私钥路径，可选
 ```
 
 ## 1. 上传代码
 
-在云主机上创建项目目录：
+推荐先在云主机上选择一个存放项目的目录，例如 `~/projects`：
 
 ```bash
-mkdir -p /home/<remote_user>
+mkdir -p ~/projects
+cd ~/projects
 ```
 
-推荐部署到 `~/pku-treehole-keyword-autosearch`，也可以选择任意目录。用 GitHub 更新代码：
+如果云主机可以访问 GitHub，直接 clone 仓库：
 
 ```bash
-cd /home/<remote_user>
-git clone https://github.com/YaoXingjin/pku-treehole-keyword-autosearch.git pku-treehole-keyword-autosearch
+git clone https://github.com/YaoXingjin/pku-treehole-keyword-autosearch.git
+cd pku-treehole-keyword-autosearch
 ```
 
-如果云主机暂时不能访问 GitHub，也可以从本地打包上传，但不要把 `config_private.py`、状态文件、日志、cookie 一起打包。
+如果云主机暂时不能访问 GitHub，也可以从本地打包上传。以下命令在本地仓库目录执行，会排除 `config_private.py`、状态文件、日志、cookie 和虚拟环境：
+
+```bash
+tar \
+  --exclude='.git' \
+  --exclude='.venv' \
+  --exclude='venv' \
+  --exclude='config_private.py' \
+  --exclude='cookies.json' \
+  --exclude='*.cookies.json' \
+  --exclude='seen_posts_state*.json' \
+  --exclude='state' \
+  --exclude='logs' \
+  -czf deploy-package.tar.gz .
+scp deploy-package.tar.gz <remote_user>@<remote_host>:~/projects/ # <remote_user>@<remote_host>替换为云主机实际地址
+```
+
+然后登录云主机，解压到项目目录：
+
+```bash
+cd ~/projects
+mkdir -p pku-treehole-keyword-autosearch
+tar -xzf deploy-package.tar.gz -C pku-treehole-keyword-autosearch
+cd pku-treehole-keyword-autosearch
+```
 
 ## 2. 上传私有配置
 
-`config_private.py` 包含账号、密码、关键词和 MeoW 昵称，不应进入公开仓库。请手动上传到远程项目目录：
+`config_private.py` 包含账号、密码、关键词和 MeoW 昵称，不应进入公开仓库。请在本地编辑后手动上传到远程项目目录。
+
+在本地执行：
 
 ```bash
-scp config_private.py <remote_user>@<remote_host>:<project_dir>/config_private.py
+scp config_private.py <remote_user>@<remote_host>:~/projects/pku-treehole-keyword-autosearch/config_private.py # <remote_user>@<remote_host>替换为云主机实际地址
 ```
 
-设置权限：
+如果你没有使用推荐目录，请把上面 scp 命令最后的远程路径改为实际项目目录。
+
+随后回到云主机的项目目录`pku-treehole-autosearch`，完成后续配置。
+
+执行设置权限：
 
 ```bash
-cd <project_dir>
 chmod 600 config_private.py
 ```
 
@@ -55,7 +84,6 @@ chmod 600 config_private.py
 ## 3. 安装依赖
 
 ```bash
-cd <project_dir>
 python3 -m venv .venv
 .venv/bin/python -m pip install -r requirements.txt
 chmod +x scripts/*.sh
@@ -73,7 +101,7 @@ CLab 云主机访问互联网前通常需要登录北大网关。官方文档中
 python3 scripts/its_network_login.py
 ```
 
-改脚本按以下顺序读取凭据：
+该脚本按以下顺序读取凭据尝试登录网关：
 
 1. `ITS_USERNAME` / `ITS_PASSWORD`
 2. `TREEHOLE_USERNAME` / `TREEHOLE_PASSWORD`
@@ -83,7 +111,6 @@ python3 scripts/its_network_login.py
 手动测试：
 
 ```bash
-cd <project_dir>
 python3 scripts/its_network_login.py
 python3 search_keyword.py --test-push
 ```
@@ -93,8 +120,7 @@ python3 search_keyword.py --test-push
 ## 5. 部署前检查
 
 ```bash
-cd <project_dir>
-PROJECT_DIR=<project_dir> scripts/check_deploy_ready.sh
+scripts/check_deploy_ready.sh
 ```
 
 检查内容包括：
@@ -107,14 +133,17 @@ PROJECT_DIR=<project_dir> scripts/check_deploy_ready.sh
 
 ## 6. 启用 systemd user timer
 
-先写入项目目录环境文件。这里的 `PROJECT_DIR` 可以是任意实际部署路径：
+先写入项目目录环境文件。下面会自动把当前目录写成 `PROJECT_DIR`；运行前请确认你已经在项目目录 `pku-treehole-keyword-autosearch` 中。
 
 ```bash
+PROJECT_DIR="$(pwd)"
 mkdir -p ~/.config/pku-treehole-keyword-autosearch
-cat > ~/.config/pku-treehole-keyword-autosearch/env <<'EOF'
-PROJECT_DIR=/home/<remote_user>/pku-treehole-keyword-autosearch
-MEOW_NICKNAME=<your_meow_nickname>
+read -r -p "MeoW 昵称: " MEOW_NICKNAME
+cat > ~/.config/pku-treehole-keyword-autosearch/env <<EOF
+PROJECT_DIR=$PROJECT_DIR
+MEOW_NICKNAME=$MEOW_NICKNAME
 EOF
+chmod 600 ~/.config/pku-treehole-keyword-autosearch/env
 ```
 
 `MEOW_NICKNAME` 也可以只写在 `config_private.py` 中；但更建议同时写入这个 systemd 环境文件。当 `config_private.py` 缺失、路径写错或 Python 环境尚未安装完整时，失败提醒也更有机会发到手机。
@@ -164,53 +193,72 @@ tail -n 100 logs/treehole-search.log
 
 ## 7. 检查运行状态
 
-登录云主机后，先确认 systemd timer 是否启用、下一次什么时候运行：
+登录云主机后，
+
+**确认 systemd timer 是否启用、下一次什么时候运行**：
 
 ```bash
 systemctl --user status treehole-search.timer
 systemctl --user list-timers --all | grep treehole
 ```
 
-再看 service 最近一次执行结果：
+正常输出应满足：
+
+- `treehole-search.timer` 显示 `active (waiting)`，表示定时器已经启用并在等待下一次触发。
+- `list-timers` 中能看到 `treehole-search.timer` 和 `treehole-search.service`。
+- `NEXT` 一列是下一次运行时间。默认应接近 UTC 02:00，也就是北京时间 10:00。
+- `LAST` 一列是上一次运行时间。如果从未运行过，可能显示 `n/a`，这时可以手动触发一次 service 验证。
+
+如果看不到 `treehole-search.timer`，说明 timer 没有启用或 systemd 没重新加载，按本节后面的“重新加载并启动”命令处理。
+
+**查看最近一次执行结果**：
 
 ```bash
 systemctl --user status treehole-search.service
 ```
 
-读取项目目录环境文件，确认 `PROJECT_DIR` 指向哪里。不要在这里放账号密码；如果写了 `MEOW_NICKNAME`，它只用于失败提醒。
+正常输出常见状态是 `inactive (dead)`，并且最近一次 `ExecStart` 的状态为 `status=0/SUCCESS`。这是正常的，因为本任务是 `oneshot`：执行完成后不会常驻后台。
+
+如果看到 `failed`，重点看这几项：
+
+- `status=203/EXEC`: 通常是脚本没有执行权限，执行 `chmod +x scripts/*.sh`，然后重新复制 service/timer 并 `daemon-reload`。
+- `status=127`: 通常是 `PROJECT_DIR` 错误或找不到脚本，检查 `~/.config/pku-treehole-keyword-autosearch/env`。
+- 其他非零状态：继续看 `logs/treehole-search.log`，通常会有失败原因，并且脚本会尽量发送 MeoW 失败提醒。
+
+**读取项目目录环境文件**，确认 `PROJECT_DIR` 指向哪里：
 
 ```bash
 cat ~/.config/pku-treehole-keyword-autosearch/env
 ```
 
-进入项目目录后看最近日志：
+正常输出应包含：
+
+```text
+PROJECT_DIR=/实际/项目/目录
+MEOW_NICKNAME=你的 MeoW 昵称
+```
+
+如果 `PROJECT_DIR` 缺失或目录不正确，systemd 会找不到脚本。进入实际项目目录后，重新执行第 6 节中写入环境文件的命令即可。
+
+**查看最近日志**：
+
+进入项目目录后，
 
 ```bash
-cd <project_dir>
 tail -n 100 logs/treehole-search.log
 ```
 
-只检查私有配置是否存在和权限是否正确，不要打印 `config_private.py` 内容：
+一次正常运行通常会看到这些阶段标记：
 
-```bash
-test -f config_private.py && echo "config_private.py exists"
-stat -c "%a %n" config_private.py
+```text
+===== scheduled run started =====
+===== gateway login =====
+===== treehole search =====
 ```
 
-如果想立刻跑一次完整定时流程：
+如果只有 `scheduled run started`，没有后续阶段，通常是 Python、配置文件或启动前检查失败。日志里出现 `Missing config_private.py`、`Python interpreter with requests not found`、`北大网关登录失败` 等字样时，按对应提示处理。
 
-```bash
-systemctl --user start treehole-search.service
-tail -n 100 logs/treehole-search.log
-```
-
-如果 timer 没有按预期出现，重新加载并启动：
-
-```bash
-systemctl --user daemon-reload
-systemctl --user enable --now treehole-search.timer
-systemctl --user list-timers --all | grep treehole
-```
+**确认触发时间**：
 
 默认配置下，`treehole-search.timer` 每天 UTC 02:00 运行，也就是北京时间 10:00。可以用下面命令确认 timer 文件里的时间：
 
@@ -247,8 +295,9 @@ grep OnCalendar ~/.config/systemd/user/treehole-search.timer
 后续更新代码可以在云主机上执行：
 
 ```bash
-cd <project_dir>
 git pull
+cp deploy/treehole-search.service ~/.config/systemd/user/
+cp deploy/treehole-search.timer ~/.config/systemd/user/
 systemctl --user daemon-reload
 systemctl --user restart treehole-search.timer
 ```
@@ -257,7 +306,7 @@ systemctl --user restart treehole-search.timer
 
 ```bash
 export HTTP_PROXY=http://127.0.0.1:<proxy_port>
-export HTTPS_PROXY=http://127.0.0.1:<proxy_port>
+export HTTPS_PROXY=http://127.0.0.1:<proxy_port> # 填入本机代理软件设置的端口，常见为7890或7897
 ```
 
 树洞和 IAAA 域名建议保持直连：
