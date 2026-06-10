@@ -278,6 +278,8 @@ grep OnCalendar ~/.config/systemd/user/treehole-search.timer
 6. 先登录北大网关。
 7. 再以非交互模式运行树洞搜索。
 
+推送正文和日志中的帖子时间默认按 `Asia/Shanghai` 显示，不依赖云主机系统时区。如果需要改为其他时区，可在 systemd 环境文件中设置 `TREEHOLE_DISPLAY_TIMEZONE`。
+
 以下失败会尽量通过 MeoW 推送提醒：
 
 - `PROJECT_DIR` 不存在。

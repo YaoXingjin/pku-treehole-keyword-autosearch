@@ -3,7 +3,12 @@
 import argparse
 import json
 import os
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
+
+try:
+    from zoneinfo import ZoneInfo
+except ImportError:
+    ZoneInfo = None
 
 from client import TreeholeClient
 from meow_push import send_meow_push
@@ -57,9 +62,19 @@ def save_seen_state(state_file, state):
         json.dump(state, f, ensure_ascii=False, indent=2)
 
 
+def get_display_timezone():
+    tz_name = os.getenv("TREEHOLE_DISPLAY_TIMEZONE") or "Asia/Shanghai"
+    if ZoneInfo is not None:
+        try:
+            return ZoneInfo(tz_name)
+        except Exception:
+            pass
+    return timezone(timedelta(hours=8), name="UTC+08:00")
+
+
 def format_readable_time(ts):
     if isinstance(ts, (int, float)):
-        return datetime.fromtimestamp(ts).strftime("%Y-%m-%d %H:%M:%S")
+        return datetime.fromtimestamp(ts, tz=get_display_timezone()).strftime("%Y-%m-%d %H:%M:%S")
     return "未知时间"
 
 

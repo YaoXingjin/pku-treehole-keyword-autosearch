@@ -71,6 +71,7 @@ export MEOW_NICKNAME="<your_meow_nickname>"
 
 - `TREEHOLE_COMMENT_LIMIT`: 每条帖子从树洞接口抓取的评论数，默认 `10`
 - `TREEHOLE_STATE_FILE`: 状态文件路径，默认 `seen_posts_state.json`
+- `TREEHOLE_DISPLAY_TIMEZONE`: 推送和终端输出中显示帖子时间的时区，默认 `Asia/Shanghai`
 - `MEOW_COMMENT_LIMIT`: 每条帖子在推送正文中展示的评论数，默认 `5`
 - `MEOW_MAX_CHARS`: 推送正文最大字符数，默认 `1800`
 - `MEOW_ENABLED`: 设为 `0`、`false`、`no` 或 `off` 时只打印不推送
