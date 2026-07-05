@@ -1,12 +1,12 @@
 # PKU CLab 云主机部署
 
-本文件说明如何把项目部署到 PKU CLab 云主机并每天定时执行。CLab 云主机创建和 SSH 连接方式请先阅读官方文档：[CLab 快速上手](https://clab.pku.edu.cn/docs/getting-started/introduction)。
+本文件说明如何把项目部署到 PKU CLab 云主机并每天定时执行。CLab 云主机创建和 SSH 连接方式请先阅读官方文档：[CLab 快速上手](https://clab.pku.edu.cn/docs/getting-started/introduction)（<u>需在**校园网**或北大 **VPN** 环境下访问</u>）。
 
 ## 前提
 
 - 已有一台 CLab 云主机。推荐使用 `rocky`。 
 - 云主机位于共享网络 `pku` 或 `pku-new`，可以访问北大校内服务。
-- 本地可以通过 SSH 登录云主机。
+- 本地可以通过 SSH 登录云主机。（<u>需要本地处于**校园网**或北大 **VPN** 环境</u>）
 - 已经准备好 `config_private.py`，但不要把它提交到 Git。
 
 下面示例只在连接云主机和上传私有配置时使用占位符。进入项目目录后，后续命令都可以直接复制执行。
@@ -93,7 +93,7 @@ chmod +x scripts/*.sh
 
 ## 4. 登录北大网关
 
-CLab 云主机访问互联网前通常需要登录北大网关。官方文档中也说明云主机和普通设备一样，需要连接网关才能访问互联网。
+CLab 云主机访问校外互联网前通常需要登录北大网关。
 
 可以参考 CLab 官方文档中的说明登录网关，也可使用本项目提供的脚本：
 
